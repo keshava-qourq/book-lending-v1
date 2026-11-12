@@ -33,11 +33,17 @@ async function signInUi(page: Page, email: string, password: string) {
   await page.getByRole("button", { name: /^sign in$/i }).click();
 }
 
-async function apiSignUp(request: import("@playwright/test").APIRequestContext, u: { email: string; password: string }) {
+async function apiSignUp(
+  request: import("@playwright/test").APIRequestContext,
+  u: { email: string; password: string },
+) {
   return request.post(`${API}/auth/signup`, { data: u });
 }
 
-async function apiSignIn(request: import("@playwright/test").APIRequestContext, u: { email: string; password: string }) {
+async function apiSignIn(
+  request: import("@playwright/test").APIRequestContext,
+  u: { email: string; password: string },
+) {
   return request.post(`${API}/auth/signin`, { data: u });
 }
 
@@ -52,7 +58,10 @@ test("[AC-001] new visitor signs up and then signs in", async ({ page, request }
   await expect(page).toHaveURL(/\/dashboard$/);
 });
 
-test("[AC-002] duplicate email in other letter case shows already exists; original works", async ({ page, request }) => {
+test("[AC-002] duplicate email in other letter case shows already exists; original works", async ({
+  page,
+  request,
+}) => {
   const u = uniqueUser();
   expect((await apiSignUp(request, u)).status()).toBe(201);
   await signUpUi(page, u.email.toUpperCase(), `pw-${randomUUID()}`);
@@ -61,25 +70,43 @@ test("[AC-002] duplicate email in other letter case shows already exists; origin
   expect(res.status()).toBe(200);
 });
 
-test("[AC-003][NFR-010] invalid email and empty password show what to fix and create nothing", async ({ page, request }) => {
+test("[AC-003][NFR-010] invalid email and empty password show what to fix and create nothing", async ({
+  page,
+  request,
+}) => {
   const bad = uniqueUser();
   await page.goto("/sign-up");
   await page.getByLabel(/email/i).fill("not-an-email");
   await page.getByLabel(/password/i).fill(bad.password);
   await page.getByRole("button", { name: /sign up/i }).click();
-  await expect(page.getByText(/email/i).filter({ hasText: /fix|valid|look like/i }).first()).toBeVisible();
-  expect((await apiSignIn(request, { email: "not-an-email", password: bad.password })).status()).not.toBe(200);
+  await expect(
+    page
+      .getByText(/email/i)
+      .filter({ hasText: /fix|valid|look like/i })
+      .first(),
+  ).toBeVisible();
+  expect(
+    (await apiSignIn(request, { email: "not-an-email", password: bad.password })).status(),
+  ).not.toBe(200);
 
   const empty = uniqueUser();
   await page.goto("/sign-up");
   await page.getByLabel(/email/i).fill(empty.email);
   await page.getByRole("button", { name: /sign up/i }).click();
-  await expect(page.getByText(/password/i).filter({ hasText: /fix|empty|enter|required/i }).first()).toBeVisible();
+  await expect(
+    page
+      .getByText(/password/i)
+      .filter({ hasText: /fix|empty|enter|required/i })
+      .first(),
+  ).toBeVisible();
   expect((await apiSignIn(request, { email: empty.email, password: "" })).status()).not.toBe(200);
   await expect(page).toHaveURL(/\/sign-up$/);
 });
 
-test("[AC-005] correct credentials land on /dashboard (new user, admin, smoke user)", async ({ page, request }) => {
+test("[AC-005] correct credentials land on /dashboard (new user, admin, smoke user)", async ({
+  page,
+  request,
+}) => {
   const u = uniqueUser();
   expect((await apiSignUp(request, u)).status()).toBe(201);
   for (const creds of [u, adminCredentials(), smokeCredentials()]) {
@@ -91,7 +118,10 @@ test("[AC-005] correct credentials land on /dashboard (new user, admin, smoke us
   }
 });
 
-test("[AC-006][NFR-004] wrong password and unknown email show identical generic message", async ({ page, request }) => {
+test("[AC-006][NFR-004] wrong password and unknown email show identical generic message", async ({
+  page,
+  request,
+}) => {
   const u = uniqueUser();
   expect((await apiSignUp(request, u)).status()).toBe(201);
 
@@ -110,7 +140,10 @@ test("[AC-006][NFR-004] wrong password and unknown email show identical generic 
   await expect(page).toHaveURL(/\/sign-in$/);
 });
 
-test("[AC-007] after sign-out the token is rejected and protected pages redirect", async ({ page, request }) => {
+test("[AC-007] after sign-out the token is rejected and protected pages redirect", async ({
+  page,
+  request,
+}) => {
   const u = uniqueUser();
   expect((await apiSignUp(request, u)).status()).toBe(201);
   await signInUi(page, u.email, u.password);
@@ -118,11 +151,15 @@ test("[AC-007] after sign-out the token is rejected and protected pages redirect
   const token = await page.evaluate(() => localStorage.getItem("session_token"));
   expect(token).toBeTruthy();
 
-  const out = await page.getByRole("button", { name: /sign out/i }).or(page.getByRole("link", { name: /sign out/i }));
+  const out = await page
+    .getByRole("button", { name: /sign out/i })
+    .or(page.getByRole("link", { name: /sign out/i }));
   await out.first().click();
   await expect(page).toHaveURL(/\/sign-in$/);
 
-  const res = await request.post(`${API}/auth/signout`, { headers: { Authorization: `Bearer ${token}` } });
+  const res = await request.post(`${API}/auth/signout`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   expect(res.status()).toBe(401);
   for (const path of ["/dashboard", "/books"]) {
     await page.goto(path);
@@ -130,7 +167,10 @@ test("[AC-007] after sign-out the token is rejected and protected pages redirect
   }
 });
 
-test("[AC-008][NFR-003] unauthenticated visits redirect and API returns 401", async ({ page, request }) => {
+test("[AC-008][NFR-003] unauthenticated visits redirect and API returns 401", async ({
+  page,
+  request,
+}) => {
   for (const path of ["/dashboard", "/books", "/book-form"]) {
     await page.goto(path);
     await expect(page).toHaveURL(/\/sign-in$/);
@@ -140,7 +180,10 @@ test("[AC-008][NFR-003] unauthenticated visits redirect and API returns 401", as
   expect(out.status()).toBe(401);
 });
 
-test("[AC-009] invalid token in localStorage returns the user to /sign-in", async ({ page, request }) => {
+test("[AC-009] invalid token in localStorage returns the user to /sign-in", async ({
+  page,
+  request,
+}) => {
   const bad = `expired-${randomUUID()}`;
   const res = await request.post(`${API}/auth/signout`, {
     headers: { Authorization: `Bearer ${bad}` },
@@ -168,7 +211,9 @@ test("[NFR-007] several users can sign up and sign in side by side", async ({ re
   }
 });
 
-test("[NFR-001][NFR-006] sign-up response exposes only id and email, never the password", async ({ request }) => {
+test("[NFR-001][NFR-006] sign-up response exposes only id and email, never the password", async ({
+  request,
+}) => {
   const u = uniqueUser();
   const res = await apiSignUp(request, u);
   expect(res.status()).toBe(201);
