@@ -1,7 +1,7 @@
 """Books and loans: CRUD, search, borrow, return and the loans dashboard, all behind sign-in."""
 
 import uuid
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Response
@@ -59,8 +59,11 @@ def _find(db: Session, book_id: str, lock: bool = False) -> Book:
 def list_books(db: DB, q: str | None = None, available_only: bool = False):
     stmt = select(Book).order_by(Book.title, Book.id)
     if q and q.strip():
-        like = f"%{q.strip()}%"
-        stmt = stmt.where(or_(Book.title.ilike(like), Book.author.ilike(like)))
+        term = q.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        like = f"%{term}%"
+        stmt = stmt.where(
+            or_(Book.title.ilike(like, escape="\\"), Book.author.ilike(like, escape="\\"))
+        )
     if available_only:
         stmt = stmt.where(Book.available_copies > 0)
     return db.scalars(stmt).all()
@@ -119,16 +122,15 @@ def borrow_book(book_id: str, db: DB, user: CurrentUser):
     book = _find(db, book_id, lock=True)
     if book.available_copies < 1:
         raise HTTPException(status_code=409, detail="No copies available")
-    loan = Loan(user_id=user.id, book_id=book.id, due_date=date.today() + timedelta(days=14))
+    due = datetime.now(UTC).date() + timedelta(days=14)
+    loan = Loan(user_id=user.id, book_id=book.id, due_date=due)
     book.available_copies -= 1
     db.add(loan)
     try:
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(
-            status_code=409, detail="You have already borrowed this book"
-        ) from None
+        raise HTTPException(status_code=409, detail="You have already borrowed this book") from None
     db.refresh(loan)
     return {
         "id": str(loan.id),
@@ -165,16 +167,20 @@ def my_loans(db: DB, user: CurrentUser):
 @router.post("/loans/{loan_id}/return")
 def return_loan(loan_id: str, db: DB, user: CurrentUser):
     try:
-        loan = db.get(Loan, uuid.UUID(loan_id), with_for_update=True)
+        loan = db.get(Loan, uuid.UUID(loan_id))
     except ValueError:
         loan = None
     if loan is None:
         raise HTTPException(status_code=404, detail="Loan not found")
     if loan.user_id != user.id:
         raise HTTPException(status_code=403, detail="This loan belongs to another user")
+    # Lock the book first, then the loan: the same order as borrow/update/delete.
+    book = db.get(Book, loan.book_id, with_for_update=True)
+    if book is None:
+        raise HTTPException(status_code=404, detail="Loan not found")
+    db.refresh(loan, with_for_update=True)
     if loan.returned_at is not None:
         raise HTTPException(status_code=409, detail="This loan has already been returned")
-    book = db.get(Book, loan.book_id, with_for_update=True)
     loan.returned_at = datetime.now(UTC)
     book.available_copies += 1
     db.commit()
