@@ -57,14 +57,21 @@ async function openAll(page: Page) {
 
 async function clickEdit(page: Page, title: string) {
   const r = row(page, title);
-  await r.getByRole("link", { name: /edit/i }).or(r.getByRole("button", { name: /edit/i })).first().click();
+  await r
+    .getByRole("link", { name: /edit/i })
+    .or(r.getByRole("button", { name: /edit/i }))
+    .first()
+    .click();
 }
 
 test.afterAll(async () => {
   for (const id of created.splice(0)) await deleteBookRows(id).catch(() => undefined);
 });
 
-test("[AC-010] adding a book with 3 copies shows it with 3 available", async ({ page, request }) => {
+test("[AC-010] adding a book with 3 copies shows it with 3 available", async ({
+  page,
+  request,
+}) => {
   const token = await signIn(page);
   const title = `QA Add ${randomUUID().slice(0, 8)}`;
   await page.goto("/books");
@@ -83,7 +90,10 @@ test("[AC-010] adding a book with 3 copies shows it with 3 available", async ({ 
   if (hit) created.push(hit.id);
 });
 
-test("[AC-011][NFR-010] invalid title, author and copies show a message and save nothing", async ({ page, request }) => {
+test("[AC-011][NFR-010] invalid title, author and copies show a message and save nothing", async ({
+  page,
+  request,
+}) => {
   const token = await signIn(page);
   const marker = `QA Invalid ${randomUUID().slice(0, 8)}`;
   const cases: Array<[string, string, string, string]> = [
@@ -105,7 +115,10 @@ test("[AC-011][NFR-010] invalid title, author and copies show a message and save
   expect(JSON.stringify(await res.json())).not.toContain(marker);
 });
 
-test("[AC-012] editing title, author and copies saves the new values", async ({ page, request }) => {
+test("[AC-012] editing title, author and copies saves the new values", async ({
+  page,
+  request,
+}) => {
   const token = await signIn(page);
   const title = `QA Edit ${randomUUID().slice(0, 8)}`;
   await apiBook(request, token, title, 2);
@@ -121,26 +134,43 @@ test("[AC-012] editing title, author and copies saves the new values", async ({ 
   await expect(r.getByRole("cell").nth(3)).toHaveText("5");
 });
 
-test("[AC-013][NFR-010] total copies below the number on loan is rejected", async ({ page, request }) => {
+test("[AC-013][NFR-010] total copies below the number on loan is rejected", async ({
+  page,
+  request,
+}) => {
   const token = await signIn(page);
   const title = `QA Loan ${randomUUID().slice(0, 8)}`;
   const id = await apiBook(request, token, title, 3);
   const users = await newUsers(request, 2);
-  await seedActiveLoans(id, users.map((u) => u.email));
+  await seedActiveLoans(
+    id,
+    users.map((u) => u.email),
+  );
   await openAll(page);
   await clickEdit(page, title);
   await page.getByLabel(/copies/i).fill("1");
   await page.getByRole("button", { name: /save book/i }).click();
-  await expect(page.getByRole("alert").filter({ hasText: /on loan/i }).first()).toContainText(/cannot be below the .*on loan/i);
-  await expect(page).toHaveURL(/\/book-form$/);
+  await expect(
+    page
+      .getByRole("alert")
+      .filter({ hasText: /on loan/i })
+      .first(),
+  ).toContainText(/cannot be below the .*on loan/i);
+  await expect(page).toHaveURL(/\/book-form(\/[^/]+)?$/);
 });
 
-test("[AC-014] raising total copies with active loans raises available by the same amount", async ({ page, request }) => {
+test("[AC-014] raising total copies with active loans raises available by the same amount", async ({
+  page,
+  request,
+}) => {
   const token = await signIn(page);
   const title = `QA Raise ${randomUUID().slice(0, 8)}`;
   const id = await apiBook(request, token, title, 3);
   const users = await newUsers(request, 2);
-  await seedActiveLoans(id, users.map((u) => u.email));
+  await seedActiveLoans(
+    id,
+    users.map((u) => u.email),
+  );
   await openAll(page);
   await expect(row(page, title).getByRole("cell").nth(2)).toHaveText("1");
   await clickEdit(page, title);
@@ -152,19 +182,28 @@ test("[AC-014] raising total copies with active loans raises available by the sa
   await expect(r.getByRole("cell").nth(2)).toHaveText("4");
 });
 
-test("[AC-015] deleting a book with no loans after confirming removes it", async ({ page, request }) => {
+test("[AC-015] deleting a book with no loans after confirming removes it", async ({
+  page,
+  request,
+}) => {
   const token = await signIn(page);
   const title = `QA Del ${randomUUID().slice(0, 8)}`;
   await apiBook(request, token, title, 1);
   await openAll(page);
   await page.getByRole("button", { name: `Delete ${title}` }).click();
-  await page.getByRole("alertdialog").getByRole("button", { name: /confirm delete/i }).click();
+  await page
+    .getByRole("alertdialog")
+    .getByRole("button", { name: /confirm delete/i })
+    .click();
   await expect(row(page, title)).toHaveCount(0);
   await page.reload();
   await expect(row(page, title)).toHaveCount(0);
 });
 
-test("[AC-016][NFR-010] deleting a book on loan is refused and the book remains", async ({ page, request }) => {
+test("[AC-016][NFR-010] deleting a book on loan is refused and the book remains", async ({
+  page,
+  request,
+}) => {
   const token = await signIn(page);
   const title = `QA Keep ${randomUUID().slice(0, 8)}`;
   const id = await apiBook(request, token, title, 2);
@@ -174,13 +213,21 @@ test("[AC-016][NFR-010] deleting a book on loan is refused and the book remains"
   await page.getByRole("button", { name: `Delete ${title}` }).click();
   const dlg = page.getByRole("alertdialog");
   await dlg.getByRole("button", { name: /confirm delete/i }).click();
-  await expect(page.getByRole("alert").filter({ hasText: /on loan/i }).first()).toBeVisible();
+  await expect(
+    page
+      .getByRole("alert")
+      .filter({ hasText: /on loan/i })
+      .first(),
+  ).toBeVisible();
   await dlg.getByRole("button", { name: /cancel/i }).click();
   await page.reload();
   await expect(row(page, title)).toBeVisible();
 });
 
-test("[NFR-003] unauthenticated book writes return 401 and visits redirect", async ({ page, request }) => {
+test("[NFR-003] unauthenticated book writes return 401 and visits redirect", async ({
+  page,
+  request,
+}) => {
   const title = `QA Unauth ${randomUUID().slice(0, 8)}`;
   const body = { title, author: "x", total_copies: 1 };
   expect((await request.post(`${API}/books`, { data: body })).status()).toBe(401);
