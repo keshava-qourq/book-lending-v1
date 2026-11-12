@@ -2,6 +2,7 @@
 
 import secrets
 from datetime import UTC, datetime, timedelta
+from functools import lru_cache
 from typing import Annotated
 
 from email_validator import EmailNotValidError, validate_email
@@ -21,7 +22,12 @@ from app.security import hash_password, hash_token, verify_password
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 DB = Annotated[Session, Depends(get_db)]
-_DUMMY_HASH = hash_password("dummy-password-for-timing")
+
+
+@lru_cache
+def _dummy_hash() -> str:
+    """Hash used to equalise timing for unknown emails; computed on first use."""
+    return hash_password("dummy-password-for-timing")
 
 
 class Credentials(BaseModel):
@@ -45,7 +51,7 @@ def signup(body: Credentials, db: DB):
         email = validate_email(email, check_deliverability=False).normalized.lower()
     except EmailNotValidError:
         errors.append({"field": "email", "message": "Enter a valid email address."})
-    if len(body.password.strip()) < 8:
+    if len(body.password) < 8:
         errors.append({"field": "password", "message": "Password must be at least 8 characters."})
     if errors:
         return _error(422, "Validation failed", errors)
@@ -66,7 +72,7 @@ def signup(body: Credentials, db: DB):
 def signin(body: Credentials, db: DB):
     user = db.scalar(select(User).where(User.email == normalise_email(body.email)))
     if user is None:
-        verify_password(_DUMMY_HASH, body.password)
+        verify_password(_dummy_hash(), body.password)
         ok = False
     else:
         ok = verify_password(user.password_hash, body.password)

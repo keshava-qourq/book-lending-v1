@@ -128,9 +128,13 @@ def borrow_book(book_id: str, db: DB, user: CurrentUser):
     db.add(loan)
     try:
         db.commit()
-    except IntegrityError:
+    except IntegrityError as exc:
         db.rollback()
-        raise HTTPException(status_code=409, detail="You have already borrowed this book") from None
+        if "uq_loans_active_user_book" in str(exc.orig):
+            raise HTTPException(
+                status_code=409, detail="You have already borrowed this book"
+            ) from None
+        raise HTTPException(status_code=409, detail="No copies available") from None
     db.refresh(loan)
     return {
         "id": str(loan.id),
