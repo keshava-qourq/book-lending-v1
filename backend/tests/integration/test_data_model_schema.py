@@ -58,9 +58,7 @@ def test_ac037_books_and_loans_columns(db_session: Session) -> None:
     assert any(c in loans for c in ("borrowed_at", "borrow_date", "created_at"))
 
 
-def test_ac038_nfr009_overdue_derived_at_read_time(
-    client: TestClient, db_session: Session
-) -> None:
+def test_ac038_nfr009_overdue_derived_at_read_time(client: TestClient, db_session: Session) -> None:
     loans = _cols(db_session, "loans")
     assert not any("overdue" in c or c == "status" for c in loans)
     for t in ("users", "books"):
