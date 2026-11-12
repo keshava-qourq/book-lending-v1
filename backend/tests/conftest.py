@@ -1,44 +1,48 @@
-"""Test fixtures: one fresh database per test, never the application's own.
+"""Test fixtures: the real database `DATABASE_URL` names, emptied around every test.
 
-Without this file every test shares the SQLite file `DATABASE_URL` names, so a row
-one test writes is still there for the next one, and the order the tests run in
-decides whether they pass. Worse, a deployment that points `DATABASE_URL` at
-Postgres makes the suite need a database server to collect at all.
-
-Each test gets an in-memory database of its own. `StaticPool` keeps every session
-on the one connection that memory lives in, and the `get_db` override makes the
-application use it instead of the engine `app.database` built at import.
+The schema is built by the migrations (the only way it changes), once per run. Each
+test then starts from empty tables, so no test depends on another's rows or on the
+order they run in. The `get_db` override makes the application use the test's session.
 """
 
 from collections.abc import Iterator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import text
 from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.pool import StaticPool
 
-from app import models  # noqa: F401 -- imported so the tables register before create_all
-from app.database import Base, get_db
+from app import models  # noqa: F401 -- imported so the tables register on Base.metadata
+from app.database import Base, engine, get_db
 from app.main import app
+from app.migrate import run_migrations
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _schema() -> None:
+    run_migrations()
+
+
+def _empty_tables() -> None:
+    names = ", ".join(f'"{t.name}"' for t in reversed(Base.metadata.sorted_tables))
+    with engine.begin() as conn:
+        if engine.dialect.name == "postgresql":
+            conn.execute(text(f"TRUNCATE {names} CASCADE"))
+        else:
+            for table in reversed(Base.metadata.sorted_tables):
+                conn.execute(table.delete())
 
 
 @pytest.fixture
 def db_session() -> Iterator[Session]:
-    """An empty database, built and thrown away around one test."""
-    engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-        future=True,
-    )
-    Base.metadata.create_all(bind=engine)
+    """An empty database around one test."""
+    _empty_tables()
     session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)()
     try:
         yield session
     finally:
         session.close()
-        engine.dispose()
+        _empty_tables()
 
 
 @pytest.fixture
