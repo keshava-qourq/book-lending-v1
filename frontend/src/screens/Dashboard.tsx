@@ -1,5 +1,4 @@
 // @ts-nocheck -- generated from the approved design under its JS runtime contract; not hand-written TypeScript.
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 
 import * as UI from "@/lib/ui";
@@ -8,16 +7,12 @@ import { brand } from "@/lib/brand";
 import { useNavigate } from "@/lib/navigate";
 import { ApiError, apiFetch, clearSessionToken } from "@/lib/api";
 
-const { Table, THead, TBody, TR, TH, TD, Empty } = UI;
+const { Table, THead, TBody, TR, TH, TD } = UI;
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-function toDay(s) {
-  const [y, m, d] = s.split("-").map(Number);
-  return Date.UTC(y, m - 1, d) / 86400000;
-}
 function fmt(s) {
   const [y, m, d] = s.split("-").map(Number);
   return String(d).padStart(2, "0") + " " + MONTHS[m - 1] + " " + y;
