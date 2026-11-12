@@ -7,7 +7,7 @@ import * as UI from "@/lib/ui";
 const { Button, Table, THead, TBody, TR, TH, TD, Empty } = UI;
 
 type Book = {
-  id: number;
+  id: string;
   title: string;
   author: string;
   total_copies: number;
@@ -19,7 +19,7 @@ export default function Screen() {
   const [books, setBooks] = React.useState<Book[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [loadError, setLoadError] = React.useState("");
-  const [pendingId, setPendingId] = React.useState<number | null>(null);
+  const [pendingId, setPendingId] = React.useState<string | null>(null);
   const [deleteError, setDeleteError] = React.useState("");
 
   React.useEffect(() => {

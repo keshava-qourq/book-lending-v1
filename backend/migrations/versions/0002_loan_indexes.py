@@ -1,4 +1,11 @@
-"""Ensure plain indexes on loans.user_id and loans.book_id exist."""
+"""Ensure plain indexes on loans.user_id and loans.book_id exist (idempotent).
+
+Revision ID: 0002_loan_indexes
+Revises: 0001
+Create Date: 2026-11-12
+
+The ID keeps its original form: databases already stamped with it must still resolve.
+"""
 
 import sqlalchemy as sa
 from alembic import op
@@ -18,4 +25,5 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    # 0001 owns these indexes; there is nothing for 0002 alone to undo.
     pass

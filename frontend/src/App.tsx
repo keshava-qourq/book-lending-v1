@@ -73,18 +73,7 @@ function AppShellLayout() {
           )}
         </div>
       </header>
-      <main
-        className="flex-1 overflow-auto"
-        onClickCapture={(e) => {
-          // A screen's own Sign out button must really end the session.
-          const btn = (e.target as HTMLElement).closest("button");
-          if (btn && /sign out/i.test(btn.textContent ?? "")) {
-            e.stopPropagation();
-            e.preventDefault();
-            void signOut();
-          }
-        }}
-      >
+      <main className="flex-1 overflow-auto">
         <Outlet />
       </main>
     </div>

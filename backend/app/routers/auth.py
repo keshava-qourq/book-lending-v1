@@ -45,8 +45,8 @@ def signup(body: Credentials, db: DB):
         email = validate_email(email, check_deliverability=False).normalized.lower()
     except EmailNotValidError:
         errors.append({"field": "email", "message": "Enter a valid email address."})
-    if not body.password.strip():
-        errors.append({"field": "password", "message": "Enter a password."})
+    if len(body.password.strip()) < 8:
+        errors.append({"field": "password", "message": "Password must be at least 8 characters."})
     if errors:
         return _error(422, "Validation failed", errors)
     exists = _error(409, "An account with this email already exists", [])

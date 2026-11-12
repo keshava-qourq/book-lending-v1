@@ -1,10 +1,7 @@
 """Engine, session factory and the request-scoped session dependency.
 
-SQLite by default so a fresh clone runs with nothing but `pip install -r
-requirements.txt` -- the approved architecture may name Postgres or MySQL, but
-naming one is not the same as having one, and a scaffold that cannot start
-without a database server is a scaffold nobody runs. Point `DATABASE_URL` at
-the real thing when it exists; nothing else has to change.
+PostgreSQL only: the migrations, the partial index and the tests all assume it.
+`DATABASE_URL` must be set (see ENVIRONMENT.md).
 """
 
 import os
@@ -13,13 +10,9 @@ from collections.abc import Iterator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./app.db")
+DATABASE_URL = os.environ["DATABASE_URL"]
 
-# SQLite rejects a connection made on one thread and used on another, which is
-# exactly what happens when FastAPI runs a sync dependency in its threadpool.
-_connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
-
-engine = create_engine(DATABASE_URL, connect_args=_connect_args, future=True)
+engine = create_engine(DATABASE_URL, future=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
 
