@@ -13,7 +13,7 @@ The user marks the book returned, and the copy count updates.
 On the dashboard, users see their current loans and any overdue ones.
 The app needs three tables: Users, Books and Loans.
 
-**Documentation version:** v5
+**Documentation version:** v6
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -25,7 +25,7 @@ The app needs three tables: Users, Books and Loans.
 | [Architecture](architecture/README.md) | 17 entries |
 | [Planning](planning/README.md) | 9 entries |
 | [Development](development/README.md) | 6 entries |
-| [Testing](testing/README.md) | 0 entries |
+| [Testing](testing/README.md) | 3 entries |
 | [Deployment](deployment/README.md) | 1 entry |
 | [Maintenance](maintenance/README.md) | 0 entries |
 | [Data model](architecture/data-model.md) | generated |
@@ -40,5 +40,5 @@ The app needs three tables: Users, Books and Loans.
 | [Runbook](deployment/runbook.md) | deployed |
 | [Release notes](deployment/release-notes.md) | 1 release |
 | [Traceability matrix](traceability-matrix.md) | 13 requirements |
-| [Changelog](CHANGELOG.md) | 5 versions |
+| [Changelog](CHANGELOG.md) | 6 versions |
 <!-- sdlc:auto:end contents -->
