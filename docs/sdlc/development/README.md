@@ -3,74 +3,86 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
-### DEV-US-001 · draft · source: dev:US-001
+### DEV-US-006 · draft · source: dev:US-006
 
-Sign up with email and password was delivered. It is recorded under commit 36c8438.
+Search books by title or author was delivered. It shares a commit with US-007.
 
-- Ticket: US-001, Sign up with email and password
-- Ticket status: delivered
-- Commit: 36c8438a672e6d3f4ae02b01a2028f824182cf30
-- No approval, review or test information was provided.
+- Ticket: US-006 - Search books by title or author
+- Status: delivered
+- Commit: 9a0477b395a2b084f6ab15b2bc1075a018f9edb1 (same commit as US-007)
+- No further implementation detail was provided in the input.
 
-**Related:** US-001
+**Related:** US-006
 
-### DEV-US-002 · draft · source: dev:US-002
+### DEV-US-007 · draft · source: dev:US-007
 
-Sign in and sign out was delivered. It is recorded under commit e9e5caa.
+Browse available books was delivered. It shares a commit with US-006.
 
-- Ticket: US-002, Sign in and sign out
-- Ticket status: delivered
-- Commit: e9e5caa0702778831a0d7d00e7a780a3214e308c
-- The same commit is recorded for US-003, US-004 and US-005.
-- No approval, review or test information was provided.
+- Ticket: US-007 - Browse available books
+- Status: delivered
+- Commit: 9a0477b395a2b084f6ab15b2bc1075a018f9edb1 (same commit as US-006)
+- No further implementation detail was provided in the input.
 
-**Related:** US-002
+**Related:** US-007
 
-### DEV-US-003 · draft · source: dev:US-003
+### DEV-US-008 · draft · source: dev:US-008
 
-Add a book was delivered. It is recorded under commit e9e5caa.
+Borrow a book failed and has no commit, so it is not delivered.
 
-- Ticket: US-003, Add a book
-- Ticket status: delivered
-- Commit: e9e5caa0702778831a0d7d00e7a780a3214e308c
-- The same commit is recorded for US-002, US-004 and US-005.
-- No approval, review or test information was provided.
+- Ticket: US-008 - Borrow a book
+- Status: failed
+- Commit: none
+- Cause of failure: not stated in the input
+- Impact: the 14-day due-date behavior on borrowing is not confirmed as built.
+- Follow-up: needs a rerun or manual resolution.
 
-**Related:** US-003
+**Related:** US-008
 
-### DEV-US-004 · draft · source: dev:US-004
+### DEV-US-009 · draft · source: dev:US-009
 
-Edit a book was delivered. It is recorded under commit e9e5caa.
+Mark a loan returned failed and has no commit, so it is not delivered.
 
-- Ticket: US-004, Edit a book
-- Ticket status: delivered
-- Commit: e9e5caa0702778831a0d7d00e7a780a3214e308c
-- The same commit is recorded for US-002, US-003 and US-005.
-- No approval, review or test information was provided.
+- Ticket: US-009 - Mark a loan returned
+- Status: failed
+- Commit: none
+- Cause of failure: not stated in the input
+- Impact: the return flow and the copy-count update are not confirmed as built.
+- Follow-up: needs a rerun or manual resolution.
 
-**Related:** US-004
+**Related:** US-009
 
-### DEV-US-005 · draft · source: dev:US-005
+### DEV-US-010 · draft · source: dev:US-010
 
-Delete a book was delivered. It is recorded under commit e9e5caa.
+See my current loans was delivered. It shares a commit with US-011.
 
-- Ticket: US-005, Delete a book
-- Ticket status: delivered
-- Commit: e9e5caa0702778831a0d7d00e7a780a3214e308c
-- The same commit is recorded for US-002, US-003 and US-004.
-- No approval, review or test information was provided.
+- Ticket: US-010 - See my current loans
+- Status: delivered
+- Commit: 0c32ef88cf0a3ca16c2180ec12472afc63738bd9 (same commit as US-011)
+- Note: the borrow ticket (US-008) failed, so this feature depends on loan data that the borrow flow would create.
+- No further implementation detail was provided in the input.
 
-**Related:** US-005
+**Related:** US-010
 
-### DEV-US-012 · draft · source: dev:US-012
+### DEV-US-011 · draft · source: dev:US-011
 
-Storage of users, books and loans was delivered. It is recorded under commit 3e4970f.
+See my overdue loans was delivered. It shares a commit with US-010.
 
-- Ticket: US-012, Store users, books and loans
-- Ticket status: delivered
-- Commit: 3e4970f00a93bb61da446cfb3ce84af119854a01
-- The project description calls for three tables: Users, Books and Loans.
-- No schema details, approval or test information were provided.
+- Ticket: US-011 - See my overdue loans
+- Status: delivered
+- Commit: 0c32ef88cf0a3ca16c2180ec12472afc63738bd9 (same commit as US-010)
+- Note: the borrow ticket (US-008) failed, so this feature depends on loan data that the borrow flow would create.
+- No further implementation detail was provided in the input.
 
-**Related:** US-012
+**Related:** US-011
+
+### DEV-US-013 · draft · source: dev:US-013
+
+The Setup and usage guide ticket was skipped, so nothing was produced for it.
+
+- Ticket: US-013 - Setup and usage guide
+- Status: skipped
+- Commit: none
+- Reason for skipping: not stated in the input.
+
+**Related:** US-013
 <!-- sdlc:auto:end narrative -->

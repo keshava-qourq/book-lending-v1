@@ -13,7 +13,7 @@ The user marks the book returned, and the copy count updates.
 On the dashboard, users see their current loans and any overdue ones.
 The app needs three tables: Users, Books and Loans.
 
-**Documentation version:** v10
+**Documentation version:** v11
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -24,7 +24,7 @@ The app needs three tables: Users, Books and Loans.
 | [Requirements](requirements/README.md) | v1 approved |
 | [Architecture](architecture/README.md) | 17 entries |
 | [Planning](planning/README.md) | 9 entries |
-| [Development](development/README.md) | 6 entries |
+| [Development](development/README.md) | 7 entries |
 | [Testing](testing/README.md) | 5 entries |
 | [Deployment](deployment/README.md) | 1 entry |
 | [Maintenance](maintenance/README.md) | 0 entries |
@@ -35,10 +35,10 @@ The app needs three tables: Users, Books and Loans.
 | [Developer guide](development/developer-guide.md) | generated |
 | [API reference](development/api-reference.md) | 14 routes |
 | [Test report](testing/test-report.md) | not run yet |
-| [Tests](testing/test-cases.md) | 135 tests |
+| [Tests](testing/test-cases.md) | 183 tests |
 | [Deployment guide](deployment/deployment-guide.md) | deployed |
 | [Runbook](deployment/runbook.md) | deployed |
 | [Release notes](deployment/release-notes.md) | 3 releases |
 | [Traceability matrix](traceability-matrix.md) | 13 requirements |
-| [Changelog](CHANGELOG.md) | 10 versions |
+| [Changelog](CHANGELOG.md) | 11 versions |
 <!-- sdlc:auto:end contents -->

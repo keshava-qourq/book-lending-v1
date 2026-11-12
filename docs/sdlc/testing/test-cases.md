@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-135 tests · Passed 135 · Failed 0 · Skipped 0 · Not run 0
+183 tests · Passed 175 · Failed 8 · Skipped 0 · Not run 0
 
-Acceptance criteria covered: 20/40 · passing: 20/40
+Acceptance criteria covered: 38/40 · passing: 31/40
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -49,7 +49,7 @@ Acceptance criteria covered: 20/40 · passing: 20/40
 | AC-006, NFR-004 | [AC-006][NFR-004] wrong password and unknown email show identical generic message | E2E | Passed | `frontend/e2e/auth.spec.ts` |
 | AC-007 | [AC-007] after sign-out the token is rejected and protected pages redirect | E2E | Passed | `frontend/e2e/auth.spec.ts` |
 | AC-008, NFR-003 | [AC-008][NFR-003] unauthenticated visits redirect and API returns 401 | E2E | Passed | `frontend/e2e/auth.spec.ts` |
-| AC-009 | [AC-009] invalid token in localStorage returns the user to /sign-in | E2E | Passed | `frontend/e2e/auth.spec.ts` |
+| AC-009 | [AC-009] invalid token in localStorage returns the user to /sign-in | E2E | Failed | `frontend/e2e/auth.spec.ts` |
 | NFR-001, NFR-006 | [NFR-001][NFR-006] sign-up response exposes only id and email, never the password | E2E | Passed | `frontend/e2e/auth.spec.ts` |
 | NFR-007 | [NFR-007] several users can sign up and sign in side by side | E2E | Passed | `frontend/e2e/auth.spec.ts` |
 
@@ -117,7 +117,7 @@ Acceptance criteria covered: 20/40 · passing: 20/40
 | NFR-007 | test_nfr007_hundreds_of_books_listed | Integration | Passed | `backend/tests/integration/test_add_book.py` |
 | AC-010 | [AC-010] adding a book with 3 copies shows it with 3 available | E2E | Passed | `frontend/e2e/books.spec.ts` |
 | AC-011, NFR-010 | [AC-011][NFR-010] invalid title, author and copies show a message and save nothing | E2E | Passed | `frontend/e2e/books.spec.ts` |
-| AC-012 | [AC-012] editing title, author and copies saves the new values | E2E | Passed | `frontend/e2e/books.spec.ts` |
+| AC-012 | [AC-012] editing title, author and copies saves the new values | E2E | Failed | `frontend/e2e/books.spec.ts` |
 | AC-013, NFR-010 | [AC-013][NFR-010] total copies below the number on loan is rejected | E2E | Passed | `frontend/e2e/books.spec.ts` |
 | AC-014 | [AC-014] raising total copies with active loans raises available by the same amount | E2E | Passed | `frontend/e2e/books.spec.ts` |
 | AC-015 | [AC-015] deleting a book with no loans after confirming removes it | E2E | Passed | `frontend/e2e/books.spec.ts` |
@@ -168,6 +168,76 @@ Acceptance criteria covered: 20/40 · passing: 20/40
 | AC-037 | test_ac037_books_and_loans_columns | Integration | Passed | `backend/tests/integration/test_data_model_schema.py` |
 | AC-038, NFR-009 | test_ac038_nfr009_overdue_derived_at_read_time | Integration | Passed | `backend/tests/integration/test_data_model_schema.py` |
 | NFR-007 | test_nfr007_thousand_books_listed | Integration | Passed | `backend/tests/integration/test_data_model_schema.py` |
+
+## Sprint 2
+
+### US-006: Search books by title or author
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-017, AC-019 | Books search and browse > [AC-017] search calls GET /books?q= and [AC-019] clearing restores the list | Unit | Passed | `frontend/src/screens/BooksSearch.test.tsx` |
+| AC-018 | Books search and browse > [AC-018] no results shows No books found | Unit | Passed | `frontend/src/screens/BooksSearch.test.tsx` |
+| AC-020 | Books search and browse > [AC-020] available toggle calls available_only=true and combines with search | Unit | Passed | `frontend/src/screens/BooksSearch.test.tsx` |
+| NFR-010 | Books search and browse > [NFR-010] search failure shows an alert | Unit | Passed | `frontend/src/screens/BooksSearch.test.tsx` |
+| AC-017, NFR-011 | [AC-017][NFR-011] search 'hobbit' then 'TOLKIEN' lists The Hobbit each time | E2E | Passed | `frontend/e2e/search.spec.ts` |
+| AC-018 | [AC-018] searching a random string shows 'No books found' | E2E | Passed | `frontend/e2e/search.spec.ts` |
+| AC-019, NFR-011 | [AC-019][NFR-011] partial fragments of a title and an author list the matches | E2E | Passed | `frontend/e2e/search.spec.ts` |
+| AC-020 | [AC-020] available-only browse lists only the book with copies, with its details | E2E | Passed | `frontend/e2e/search.spec.ts` |
+| AC-021 | [AC-021] after the last copy is borrowed, refreshing the browse view drops the book | E2E | Passed | `frontend/e2e/search.spec.ts` |
+| NFR-003 | [NFR-003] visiting /books while signed out redirects to /sign-in | E2E | Passed | `frontend/e2e/search.spec.ts` |
+| NFR-007 | [NFR-007] search lists many books at once | E2E | Passed | `frontend/e2e/search.spec.ts` |
+
+### US-008: Borrow a book
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-022 | Borrow > [AC-022] borrow posts, drops available copies and shows the due date | Unit | Passed | `frontend/src/screens/Borrow.test.tsx` |
+| AC-023 | Borrow > [AC-023] borrow is disabled with zero copies | Unit | Passed | `frontend/src/screens/Borrow.test.tsx` |
+| AC-023 | Borrow > [AC-023] no-copies refusal shows an alert and list is unchanged | Unit | Passed | `frontend/src/screens/Borrow.test.tsx` |
+| AC-024 | Borrow > [AC-024] already-borrowed refusal shows the detail in an alert | Unit | Passed | `frontend/src/screens/Borrow.test.tsx` |
+| AC-022 | [AC-022] borrowing an available book shows due date in 14 days and drops available by one | E2E | Failed | `frontend/e2e/borrow.spec.ts` |
+| AC-023, NFR-010 | [AC-023][NFR-010] a book with 0 available copies is refused with visible text and no loan | E2E | Failed | `frontend/e2e/borrow.spec.ts` |
+| AC-024, NFR-010 | [AC-024][NFR-010] borrowing the same book twice shows already borrowed; one loan exists | E2E | Failed | `frontend/e2e/borrow.spec.ts` |
+| AC-025, NFR-008 | [AC-025][NFR-008] two users borrowing the last copy concurrently: one 201, one 409, available 0 | E2E | Passed | `frontend/e2e/borrow.spec.ts` |
+| NFR-003 | [NFR-003] borrow without a token returns 401 and unauthenticated visits redirect | E2E | Passed | `frontend/e2e/borrow.spec.ts` |
+| NFR-007 | [NFR-007] several books and users borrow side by side | E2E | Failed | `frontend/e2e/borrow.spec.ts` |
+
+### US-009: Mark a loan returned
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-026 | test_ac026_return_records_date_and_increases_available | Integration | Passed | `backend/tests/integration/test_return_loan.py` |
+| AC-026 | test_ac026_unknown_loan_is_404 | Integration | Passed | `backend/tests/integration/test_return_loan.py` |
+| AC-027, NFR-008 | test_ac027_nfr008_second_return_does_not_add_copy_again | Integration | Passed | `backend/tests/integration/test_return_loan.py` |
+| AC-028, NFR-005 | test_ac028_nfr005_other_users_loan_refused_and_unchanged | Integration | Passed | `backend/tests/integration/test_return_loan.py` |
+| NFR-003 | test_nfr003_return_needs_sign_in_and_changes_nothing | Integration | Passed | `backend/tests/integration/test_return_loan.py` |
+| NFR-007 | test_nfr007_many_loans_returned_side_by_side | Integration | Passed | `backend/tests/integration/test_return_loan.py` |
+| AC-026 | [AC-026] marking a loan returned removes it from the dashboard and frees a copy | E2E | Failed | `frontend/e2e/return.spec.ts` |
+| AC-027, NFR-008 | [AC-027][NFR-008] returning twice does not add a copy twice | E2E | Passed | `frontend/e2e/return.spec.ts` |
+| AC-028, NFR-005 | [AC-028][NFR-005] another user's loan cannot be returned and is not on their dashboard | E2E | Failed | `frontend/e2e/return.spec.ts` |
+| NFR-003 | [NFR-003] return without a token is refused and changes nothing | E2E | Passed | `frontend/e2e/return.spec.ts` |
+
+### US-010: See my current loans
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-029 | Dashboard > [AC-029] lists current loans from the API | Unit | Passed | `frontend/src/screens/Dashboard.test.tsx` |
+| AC-031 | Dashboard > [AC-031] shows the empty message | Unit | Passed | `frontend/src/screens/Dashboard.test.tsx` |
+| AC-032, AC-033 | Dashboard > [AC-032] overdue loans show an Overdue badge; [AC-033] others do not | Unit | Passed | `frontend/src/screens/Dashboard.test.tsx` |
+| AC-034 | Dashboard > [AC-034] return posts, confirms and refetches | Unit | Passed | `frontend/src/screens/Dashboard.test.tsx` |
+| NFR-010 | Dashboard > [NFR-010] failed load shows an alert | Unit | Passed | `frontend/src/screens/Dashboard.test.tsx` |
+| NFR-010 | Dashboard > [NFR-010] failed return shows an alert and keeps the loan | Unit | Passed | `frontend/src/screens/Dashboard.test.tsx` |
+| AC-026 | [AC-026] marking a current loan returned shows it as returned and frees a copy | E2E | Passed | `frontend/e2e/dashboard.spec.ts` |
+| AC-027, NFR-008 | [AC-027][NFR-008] replaying a return is refused and copies do not increase again | E2E | Passed | `frontend/e2e/dashboard.spec.ts` |
+| AC-028, NFR-005 | [AC-028][NFR-005] another user's return is refused with 403 and the loan stays | E2E | Passed | `frontend/e2e/dashboard.spec.ts` |
+| AC-029 | [AC-029] two borrowed books are listed with title, author, dates and Mark returned | E2E | Passed | `frontend/e2e/dashboard.spec.ts` |
+| AC-030, NFR-005 | [AC-030][NFR-005] another user's loans never appear on my dashboard | E2E | Passed | `frontend/e2e/dashboard.spec.ts` |
+| AC-031 | [AC-031] a user with no loans sees 'You have no current loans' | E2E | Passed | `frontend/e2e/dashboard.spec.ts` |
+| AC-032 | [AC-032] a loan with a past due date appears in the overdue list | E2E | Passed | `frontend/e2e/dashboard.spec.ts` |
+| AC-033 | [AC-033] loans due today or later are not in the overdue list | E2E | Passed | `frontend/e2e/dashboard.spec.ts` |
+| AC-034 | [AC-034] returning an overdue loan removes it from both lists and frees a copy | E2E | Passed | `frontend/e2e/dashboard.spec.ts` |
+| NFR-003 | [NFR-003] visiting /dashboard while signed out redirects to /sign-in | E2E | Passed | `frontend/e2e/dashboard.spec.ts` |
+| NFR-007 | [NFR-007] the dashboard lists many loans for one user | E2E | Passed | `frontend/e2e/dashboard.spec.ts` |
 
 ## Project setup
 
