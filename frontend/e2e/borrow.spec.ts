@@ -112,7 +112,9 @@ test("[AC-023][NFR-010] a book with 0 available copies is refused with visible t
   await expect(row(page, title).getByRole("cell").nth(2)).toHaveText("0");
   const btn = borrowButton(page, title);
   if (await btn.isEnabled()) await btn.click();
-  await expect(page.getByText(/no copies available|not available|unavailable/i).first()).toBeVisible();
+  await expect(
+    page.getByText(/no copies available|not available|unavailable/i).first(),
+  ).toBeVisible();
   await expect(row(page, title).getByRole("cell").nth(2)).toHaveText("0");
   await page.goto("/dashboard");
   await expect(page.getByText(title)).toHaveCount(0);
@@ -178,7 +180,9 @@ test("[NFR-003] borrow without a token returns 401 and unauthenticated visits re
 
 test("[NFR-007] several books and users borrow side by side", async ({ request }) => {
   const ids = await Promise.all(
-    Array.from({ length: 5 }, (_, i) => apiBook(request, `QA Many ${i} ${randomUUID().slice(0, 6)}`, 5)),
+    Array.from({ length: 5 }, (_, i) =>
+      apiBook(request, `QA Many ${i} ${randomUUID().slice(0, 6)}`, 5),
+    ),
   );
   const users = await Promise.all(Array.from({ length: 5 }, () => newUser(request)));
   for (const u of users) {

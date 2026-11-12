@@ -37,7 +37,9 @@ async function borrow(request: APIRequestContext, id: string, token: string): Pr
 }
 
 async function available(request: APIRequestContext, id: string, token: string) {
-  const r = await request.get(`${API}/books/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+  const r = await request.get(`${API}/books/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   return (await r.json()).available_copies as number;
 }
 

@@ -1,6 +1,6 @@
 # Book lending - v1
 
-Book Lending App 
+Book Lending App
 
 Email and password sign-up and sign-in.
 Users add, edit and delete books (title, author, copies).
