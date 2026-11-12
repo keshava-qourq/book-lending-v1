@@ -76,10 +76,7 @@ def test_ac009_nfr002_expired_session_returns_401(client: TestClient, db_session
     u, token = _signed_in(client)
     assert client.get("/books", headers=_h(token)).status_code == 200
     db_session.execute(
-        text(
-            "UPDATE users SET session_expires_at = now() - interval '1 minute' "
-            "WHERE email = :e"
-        ),
+        text("UPDATE users SET session_expires_at = now() - interval '1 minute' WHERE email = :e"),
         {"e": u["email"]},
     )
     db_session.commit()
