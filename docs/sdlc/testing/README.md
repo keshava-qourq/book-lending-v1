@@ -3,37 +3,61 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
-### TEST-RUN-CHECKS · draft · source: testing:run_checks
+### TEST-CHECKS-1 · draft · source: testing:run_checks
 
-A check run that was not tied to a specific ticket completed successfully. All 8 of 8 checks passed.
+A project-wide check run completed successfully, with 8 of 8 checks passing. It was not tied to a specific ticket.
 
-- Action: run_checks
-- Ticket: none (project-level run)
-- Status: succeeded
+- Run type: run_checks
+- Ticket: none (not tied to a single ticket)
+- Outcome: succeeded
 - Result: 8/8 checks passed
-- Not provided: names of the individual checks, what they cover, run date, and mapping to requirements (US-001 to US-013).
+- Not stated in the input: the names or types of the 8 checks, the run date, and which requirements they cover.
 
-### TEST-WRITE-d7ad2dc8 · draft · source: testing:write_tests:d7ad2dc8-f870-42ce-acc9-70a581c9eaf1
+### TEST-WRITE-ce153d72 · draft · source: testing:write_tests:ce153d72-fa08-4998-ae46-c49d717cb309
 
-Tests were written for ticket d7ad2dc8-f870-42ce-acc9-70a581c9eaf1. The run succeeded and produced 5 test files.
+Test authoring for ticket ce153d72-fa08-4998-ae46-c49d717cb309 succeeded and produced 2 test files.
 
-- Action: write_tests
-- Ticket: d7ad2dc8-f870-42ce-acc9-70a581c9eaf1
-- Status: succeeded
-- Output: 5 test file(s)
-- Not provided: file names, the features or requirements covered, and whether the tests have been executed or what they returned.
+- Run type: write_tests
+- Ticket: ce153d72-fa08-4998-ae46-c49d717cb309
+- Outcome: succeeded
+- Result: 2 test file(s) produced
+- Not stated in the input: the file names, what the tests cover, the linked requirements, and whether the tests were executed.
 
-**Related:** d7ad2dc8-f870-42ce-acc9-70a581c9eaf1
+**Related:** ce153d72-fa08-4998-ae46-c49d717cb309
 
-### TEST-WRITE-fba6fa60 · draft · source: testing:write_tests:fba6fa60-9fd6-497f-9a4f-85322d3d5999
+### TEST-WRITE-5a914872 · draft · source: testing:write_tests:5a914872-bdbf-4d9b-9ccb-8e911e0a16f9
 
-Tests were written for ticket fba6fa60-9fd6-497f-9a4f-85322d3d5999. The run succeeded and produced 4 test files.
+Test authoring for ticket 5a914872-bdbf-4d9b-9ccb-8e911e0a16f9 succeeded and produced 2 test files.
 
-- Action: write_tests
-- Ticket: fba6fa60-9fd6-497f-9a4f-85322d3d5999
-- Status: succeeded
-- Output: 4 test file(s)
-- Not provided: file names, the features or requirements covered, and whether the tests have been executed or what they returned.
+- Run type: write_tests
+- Ticket: 5a914872-bdbf-4d9b-9ccb-8e911e0a16f9
+- Outcome: succeeded
+- Result: 2 test file(s) produced
+- Not stated in the input: the file names, what the tests cover, the linked requirements, and whether the tests were executed.
 
-**Related:** fba6fa60-9fd6-497f-9a4f-85322d3d5999
+**Related:** 5a914872-bdbf-4d9b-9ccb-8e911e0a16f9
+
+### TEST-WRITE-a639bf88 · draft · source: testing:write_tests:a639bf88-1f6b-42c0-9f55-51ac28b66116
+
+Test authoring for ticket a639bf88-1f6b-42c0-9f55-51ac28b66116 succeeded and produced 2 test files.
+
+- Run type: write_tests
+- Ticket: a639bf88-1f6b-42c0-9f55-51ac28b66116
+- Outcome: succeeded
+- Result: 2 test file(s) produced
+- Not stated in the input: the file names, what the tests cover, the linked requirements, and whether the tests were executed.
+
+**Related:** a639bf88-1f6b-42c0-9f55-51ac28b66116
+
+### TEST-WRITE-efcbd623 · draft · source: testing:write_tests:efcbd623-4695-4ee8-9ba8-195c50777935
+
+Test authoring for ticket efcbd623-4695-4ee8-9ba8-195c50777935 succeeded and produced 2 test files.
+
+- Run type: write_tests
+- Ticket: efcbd623-4695-4ee8-9ba8-195c50777935
+- Outcome: succeeded
+- Result: 2 test file(s) produced
+- Not stated in the input: the file names, what the tests cover, the linked requirements, and whether the tests were executed.
+
+**Related:** efcbd623-4695-4ee8-9ba8-195c50777935
 <!-- sdlc:auto:end narrative -->
