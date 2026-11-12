@@ -6,7 +6,7 @@ import * as UI from "@/lib/ui";
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import { useNavigate } from "@/lib/navigate";
-import { apiFetch, clearSessionToken } from "@/lib/api";
+import { ApiError, apiFetch, clearSessionToken } from "@/lib/api";
 
 const { Table, THead, TBody, TR, TH, TD, Empty } = UI;
 
@@ -22,22 +22,19 @@ function fmt(s) {
   const [y, m, d] = s.split("-").map(Number);
   return String(d).padStart(2, "0") + " " + MONTHS[m - 1] + " " + y;
 }
-function daysLeft(due) {
-  return toDay(due) - toDay(TODAY);
-}
 function plural(n, w) {
   return n + " " + w + (n === 1 ? "" : "s");
 }
-function dueNote(due) {
-  const n = daysLeft(due);
-  if (n < 0) return plural(Math.abs(n), "day") + " late";
-  if (n === 0) return "due today";
-  return "in " + plural(n, "day");
-}
+const day = (s) => s.slice(0, 10);
+const errText = (err, fallback) => (err instanceof ApiError ? err.detail : fallback);
 
 export default function Screen() {
   const navigate = useNavigate();
-  const [loans, setLoans] = React.useState([]);
+  const [active, setActive] = React.useState([]);
+  const [overdue, setOverdue] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [loadError, setLoadError] = React.useState("");
+  const [returnError, setReturnError] = React.useState("");
   const [notice, setNotice] = React.useState(null);
 
   const ink = brand.primaryColor;
@@ -45,35 +42,33 @@ export default function Screen() {
   const accent = brand.accentColor;
   const muted = brand.neutralColor;
 
-  const active = loans
-    .filter((l) => !l.returned_at)
-    .sort((a, b) => (a.due_date < b.due_date ? -1 : 1));
-  const overdue = active.filter((l) => l.due_date < TODAY);
+  const load = async () => {
+    try {
+      const r = await apiFetch("/loans/me");
+      setActive(r.current);
+      setOverdue(r.overdue);
+      setLoadError("");
+    } catch (err) {
+      setLoadError(errText(err, "Could not load your loans."));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   React.useEffect(() => {
-    apiFetch("/loans/me")
-      .then((r) =>
-        setLoans(
-          r.current.map((l) => ({
-            ...l,
-            borrowed_at: l.borrowed_at.slice(0, 10),
-            due_date: l.due_date.slice(0, 10),
-            returned_at: null,
-          })),
-        ),
-      )
-      .catch(() => undefined);
+    load();
   }, []);
 
-  const markReturned = (loan) => {
-    apiFetch("/loans/" + loan.id + "/return", { method: "POST" })
-      .then(() => {
-        setLoans((prev) =>
-          prev.map((l) => (l.id === loan.id && !l.returned_at ? { ...l, returned_at: TODAY } : l)),
-        );
-        setNotice({ title: loan.title, late: loan.due_date < TODAY });
-      })
-      .catch(() => undefined);
+  const markReturned = async (loan) => {
+    setReturnError("");
+    try {
+      await apiFetch("/loans/" + loan.id + "/return", { method: "POST" });
+    } catch (err) {
+      setReturnError(errText(err, "Could not mark the loan returned. Please try again."));
+      return;
+    }
+    setNotice({ title: loan.title, late: loan.is_overdue });
+    await load();
   };
 
   const box = { border: "3px solid " + ink, boxShadow: "6px 6px 0 " + ink, backgroundColor: paper };
@@ -112,7 +107,7 @@ export default function Screen() {
 
   const rows = (list, prefix) =>
     list.map((l) => {
-      const late = l.due_date < TODAY;
+      const late = l.is_overdue;
       return (
         <TR key={l.id} className="bs-row">
           <TD
@@ -127,9 +122,9 @@ export default function Screen() {
             {l.title}
           </TD>
           <TD style={td}>{l.author}</TD>
-          <TD style={{ ...td, whiteSpace: "nowrap" }}>{fmt(l.borrowed_at)}</TD>
+          <TD style={{ ...td, whiteSpace: "nowrap" }}>{fmt(day(l.borrowed_at))}</TD>
           <TD style={{ ...td, whiteSpace: "nowrap" }}>
-            <div style={{ fontWeight: 700 }}>{fmt(l.due_date)}</div>
+            <div style={{ fontWeight: 700 }}>{fmt(day(l.due_date))}</div>
             <div
               style={{
                 marginTop: 8,
@@ -156,7 +151,6 @@ export default function Screen() {
                   <Icons.AlertCircle width={14} height={14} aria-hidden="true" /> Overdue
                 </span>
               ) : null}
-              <span style={{ fontSize: 12, color: muted }}>{dueNote(l.due_date)}</span>
             </div>
           </TD>
           <TD style={td}>
@@ -256,6 +250,18 @@ export default function Screen() {
           <span>{plural(active.length, "book")} on loan</span>
           <span style={{ color: muted }}>Loans are 14 days. No renewals, no fines.</span>
         </p>
+
+        {loadError ? (
+          <p role="alert" style={{ ...box, marginTop: 24, padding: "12px 16px", fontWeight: 700 }}>
+            {loadError}
+          </p>
+        ) : null}
+        {returnError ? (
+          <p role="alert" style={{ ...box, marginTop: 24, padding: "12px 16px", fontWeight: 700 }}>
+            {returnError}
+          </p>
+        ) : null}
+        {loading ? <p role="status">Loading your loans…</p> : null}
 
         <div role="status" aria-live="polite">
           {notice ? (
@@ -388,7 +394,7 @@ export default function Screen() {
         </section>
 
         {/* Row 6 */}
-        {active.length === 0 ? (
+        {!loading && !loadError && active.length === 0 ? (
           <div
             data-wf="b-5-0"
             className="bs-notice"
@@ -412,8 +418,9 @@ export default function Screen() {
                 maxWidth: 640,
               }}
             >
-              You have no current loans. Browse books to borrow one.
+              You have no current loans
             </p>
+            <p style={{ margin: 0 }}>Browse books to borrow one.</p>
             <button type="button" className="bs-btn bs-primary" onClick={() => navigate("books")}>
               Browse books <Icons.ArrowRight width={16} height={16} aria-hidden="true" />
             </button>
