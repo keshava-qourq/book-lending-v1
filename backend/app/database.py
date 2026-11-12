@@ -10,7 +10,8 @@ from collections.abc import Iterator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-DATABASE_URL = os.environ["DATABASE_URL"]
+# Import never connects; without DATABASE_URL the engine is a placeholder that fails on first use.
+DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql+psycopg://")
 
 engine = create_engine(DATABASE_URL, future=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
