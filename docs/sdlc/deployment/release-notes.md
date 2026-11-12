@@ -7,11 +7,7 @@
 
 **Commit:** `cc1c390`
 
-**Delivered:**
-- US-001: Sign up with email and password
-- US-002: Sign in and sign out
-- US-003: Add a book
-- US-012: Store users, books and loans
+_Nothing delivered in this window._
 
 ## 809bdadef770 — 2026-11-12
 
