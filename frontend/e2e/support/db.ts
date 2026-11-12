@@ -37,6 +37,30 @@ export async function seedActiveLoans(bookId: string, emails: string[]): Promise
   }
 }
 
+// Insert one active loan with an explicit due date (YYYY-MM-DD) and lower available_copies.
+export async function seedLoanDue(bookId: string, email: string, dueDate: string): Promise<void> {
+  const c = new Client({ connectionString: url() });
+  await c.connect();
+  try {
+    await c.query("BEGIN");
+    const u = await c.query("SELECT id FROM users WHERE email = $1", [email.toLowerCase()]);
+    if (u.rows.length !== 1) throw new Error(`user ${email} not found`);
+    await c.query(
+      "INSERT INTO loans (id, user_id, book_id, due_date) VALUES (gen_random_uuid(), $1, $2, $3::date)",
+      [u.rows[0].id, bookId, dueDate],
+    );
+    await c.query("UPDATE books SET available_copies = available_copies - 1 WHERE id = $1", [
+      bookId,
+    ]);
+    await c.query("COMMIT");
+  } catch (e) {
+    await c.query("ROLLBACK");
+    throw e;
+  } finally {
+    await c.end();
+  }
+}
+
 export async function deleteBookRows(bookId: string): Promise<void> {
   const c = new Client({ connectionString: url() });
   await c.connect();
