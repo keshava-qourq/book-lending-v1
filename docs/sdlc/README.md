@@ -31,9 +31,9 @@ The app needs three tables: Users, Books and Loans.
 | [Data model](architecture/data-model.md) | generated |
 | [API (OpenAPI)](architecture/api/openapi.yaml) | generated |
 | [Decisions (ADRs)](architecture/adr/README.md) | 4 decisions |
-| [Sprint plan](development/sprint-plan.md) | not generated yet |
-| [Developer guide](development/developer-guide.md) | not generated yet |
-| [API reference](development/api-reference.md) | 0 routes |
+| [Sprint plan](development/sprint-plan.md) | 2 sprints |
+| [Developer guide](development/developer-guide.md) | generated |
+| [API reference](development/api-reference.md) | 1 route |
 | [Test report](testing/test-report.md) | not run yet |
 | [Tests](testing/test-cases.md) | 0 tests |
 | [Deployment guide](deployment/deployment-guide.md) | not deployed yet |
