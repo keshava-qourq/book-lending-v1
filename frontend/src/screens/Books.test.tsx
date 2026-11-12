@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -130,5 +130,15 @@ describe("BookForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save book" }));
     expect(await screen.findByText(msg)).toBeInTheDocument();
     expect(mock).toHaveBeenLastCalledWith("/books/1", expect.objectContaining({ method: "PUT" }));
+  });
+});
+
+describe("Books row actions", () => {
+  it("[AC-012] Edit is the first action in a row, ahead of Borrow", async () => {
+    mock.mockResolvedValueOnce([hobbit]);
+    renderAt("/books");
+    await screen.findByRole("button", { name: "Edit The Hobbit" });
+    const row = screen.getByRole("row", { name: /The Hobbit/ });
+    expect(within(row).getAllByRole("button")[0]).toHaveAccessibleName("Edit The Hobbit");
   });
 });

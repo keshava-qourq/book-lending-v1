@@ -81,7 +81,9 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     const isAuthForm = path === "/auth/signin" || path === "/auth/signup";
     if (response.status === 401 && !isAuthForm) {
       clearSessionToken();
-      if (path !== "/auth/signout") {
+      // The dashboard keeps its Sign out button on a rejected load, so the user leaves
+      // through it rather than by a hard redirect that would remove it mid-click.
+      if (path !== "/auth/signout" && path !== "/loans/me") {
         window.location.assign(`${import.meta.env.BASE_URL}sign-in`);
       }
     }

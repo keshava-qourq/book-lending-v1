@@ -202,6 +202,15 @@ export default function Screen() {
                     <span className="flex gap-2">
                       <Button
                         type="button"
+                        variant="secondary"
+                        size="sm"
+                        aria-label={`Edit ${b.title}`}
+                        onClick={() => navigate(`book-form/${b.id}`)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        type="button"
                         size="sm"
                         aria-label={`Borrow ${b.title}`}
                         disabled={b.available_copies <= 0}
@@ -212,15 +221,6 @@ export default function Screen() {
                       {b.available_copies <= 0 && (
                         <span className="self-center text-xs">No copies available</span>
                       )}
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        aria-label={`Edit ${b.title}`}
-                        onClick={() => navigate(`book-form/${b.id}`)}
-                      >
-                        Edit
-                      </Button>
                       <Button
                         type="button"
                         variant="secondary"
