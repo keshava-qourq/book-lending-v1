@@ -12,49 +12,6 @@ const { Table, THead, TBody, TR, TH, TD, Empty } = UI;
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
-const SEED_LOANS = [
-  {
-    id: "ln-1041",
-    title: "The Left Hand of Darkness",
-    author: "Ursula K. Le Guin",
-    borrowed_at: "2026-10-19",
-    due_date: "2026-11-02",
-    returned_at: null,
-  },
-  {
-    id: "ln-1047",
-    title: "Piranesi",
-    author: "Susanna Clarke",
-    borrowed_at: "2026-10-26",
-    due_date: "2026-11-09",
-    returned_at: null,
-  },
-  {
-    id: "ln-1052",
-    title: "The Hobbit",
-    author: "J.R.R. Tolkien",
-    borrowed_at: "2026-10-29",
-    due_date: "2026-11-12",
-    returned_at: null,
-  },
-  {
-    id: "ln-1058",
-    title: "Braiding Sweetgrass",
-    author: "Robin Wall Kimmerer",
-    borrowed_at: "2026-11-03",
-    due_date: "2026-11-17",
-    returned_at: null,
-  },
-  {
-    id: "ln-1063",
-    title: "Invisible Cities",
-    author: "Italo Calvino",
-    borrowed_at: "2026-11-12",
-    due_date: "2026-11-26",
-    returned_at: null,
-  },
-];
-
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 function toDay(s) {
@@ -80,7 +37,7 @@ function dueNote(due) {
 
 export default function Screen() {
   const navigate = useNavigate();
-  const [loans, setLoans] = React.useState(SEED_LOANS);
+  const [loans, setLoans] = React.useState([]);
   const [notice, setNotice] = React.useState(null);
 
   const ink = brand.primaryColor;
@@ -93,11 +50,30 @@ export default function Screen() {
     .sort((a, b) => (a.due_date < b.due_date ? -1 : 1));
   const overdue = active.filter((l) => l.due_date < TODAY);
 
+  React.useEffect(() => {
+    apiFetch("/loans/me")
+      .then((r) =>
+        setLoans(
+          r.current.map((l) => ({
+            ...l,
+            borrowed_at: l.borrowed_at.slice(0, 10),
+            due_date: l.due_date.slice(0, 10),
+            returned_at: null,
+          })),
+        ),
+      )
+      .catch(() => undefined);
+  }, []);
+
   const markReturned = (loan) => {
-    setLoans((prev) =>
-      prev.map((l) => (l.id === loan.id && !l.returned_at ? { ...l, returned_at: TODAY } : l)),
-    );
-    setNotice({ title: loan.title, late: loan.due_date < TODAY });
+    apiFetch("/loans/" + loan.id + "/return", { method: "POST" })
+      .then(() => {
+        setLoans((prev) =>
+          prev.map((l) => (l.id === loan.id && !l.returned_at ? { ...l, returned_at: TODAY } : l)),
+        );
+        setNotice({ title: loan.title, late: loan.due_date < TODAY });
+      })
+      .catch(() => undefined);
   };
 
   const box = { border: "3px solid " + ink, boxShadow: "6px 6px 0 " + ink, backgroundColor: paper };
