@@ -103,6 +103,7 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/books" element={<Books />} />
           <Route path="/book-form" element={<BookForm />} />
+          <Route path="/book-form/:id" element={<BookForm />} />
         </Route>
       </Route>
       <Route path="/sign-in" element={<SignIn />} />

@@ -20,6 +20,7 @@ from app.config import get_settings
 from app.database import SessionLocal
 from app.migrate import run_migrations
 from app.routers.auth import router as auth_router
+from app.routers.books import router as books_router
 from app.seed import seed_users
 
 
@@ -79,6 +80,7 @@ async def http_error_handler(request: Request, exc: StarletteHTTPException) -> J
 
 
 app.include_router(auth_router)
+app.include_router(books_router)
 
 
 @app.get("/health")
