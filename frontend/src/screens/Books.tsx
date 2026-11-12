@@ -204,7 +204,7 @@ export default function Screen() {
                         type="button"
                         variant="secondary"
                         size="sm"
-                        aria-label={`Edit ${b.title}`}
+                        aria-label="Edit"
                         onClick={() => navigate(`book-form/${b.id}`)}
                       >
                         Edit

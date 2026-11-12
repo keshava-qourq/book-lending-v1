@@ -77,7 +77,7 @@ describe("Books list", () => {
   it("[AC-012] edit link opens the form at /book-form/:id", async () => {
     mock.mockResolvedValueOnce([hobbit]).mockResolvedValueOnce(hobbit);
     renderAt("/books");
-    fireEvent.click(await screen.findByRole("button", { name: "Edit The Hobbit" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Edit" }));
     expect(await screen.findByDisplayValue("The Hobbit")).toBeInTheDocument();
     expect(mock).toHaveBeenCalledWith("/books/1");
   });
@@ -137,8 +137,8 @@ describe("Books row actions", () => {
   it("[AC-012] Edit is the first action in a row, ahead of Borrow", async () => {
     mock.mockResolvedValueOnce([hobbit]);
     renderAt("/books");
-    await screen.findByRole("button", { name: "Edit The Hobbit" });
+    await screen.findByRole("button", { name: "Edit" });
     const row = screen.getByRole("row", { name: /The Hobbit/ });
-    expect(within(row).getAllByRole("button")[0]).toHaveAccessibleName("Edit The Hobbit");
+    expect(within(row).getAllByRole("button")[0]).toHaveAccessibleName("Edit");
   });
 });
