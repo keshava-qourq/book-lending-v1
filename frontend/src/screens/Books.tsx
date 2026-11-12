@@ -21,6 +21,8 @@ export default function Screen() {
   const [loadError, setLoadError] = React.useState("");
   const [pendingId, setPendingId] = React.useState<string | null>(null);
   const [deleteError, setDeleteError] = React.useState("");
+  const [borrowError, setBorrowError] = React.useState("");
+  const [borrowNote, setBorrowNote] = React.useState("");
 
   React.useEffect(() => {
     let live = true;
@@ -52,6 +54,30 @@ export default function Screen() {
     }
   };
 
+  const borrow = async (book: Book) => {
+    setBorrowError("");
+    setBorrowNote("");
+    try {
+      const loan = await apiFetch<{ due_date: string }>(`/books/${book.id}/borrow`, {
+        method: "POST",
+      });
+      setBooks((prev) =>
+        prev.map((b) =>
+          b.id === book.id ? { ...b, available_copies: Math.max(0, b.available_copies - 1) } : b,
+        ),
+      );
+      setBorrowNote(`You borrowed “${book.title}”. Due back on ${loan.due_date}.`);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        navigate("sign-in");
+        return;
+      }
+      setBorrowError(
+        err instanceof ApiError ? err.detail : "Could not borrow the book. Please try again.",
+      );
+    }
+  };
+
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-8">
       <div className="mb-6 flex items-center justify-between gap-4">
@@ -66,6 +92,17 @@ export default function Screen() {
       {deleteError && (
         <p role="alert" className="mb-4 border-2 p-3 text-sm font-bold">
           {deleteError}
+        </p>
+      )}
+
+      {borrowError && (
+        <p role="alert" className="mb-4 border-2 p-3 text-sm font-bold">
+          {borrowError}
+        </p>
+      )}
+      {borrowNote && (
+        <p role="status" className="mb-4 border-2 p-3 text-sm font-bold">
+          {borrowNote}
         </p>
       )}
 
@@ -128,6 +165,18 @@ export default function Screen() {
                     </span>
                   ) : (
                     <span className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        aria-label={`Borrow ${b.title}`}
+                        disabled={b.available_copies <= 0}
+                        onClick={() => borrow(b)}
+                      >
+                        Borrow
+                      </Button>
+                      {b.available_copies <= 0 && (
+                        <span className="self-center text-xs">No copies available</span>
+                      )}
                       <Button
                         type="button"
                         variant="secondary"
