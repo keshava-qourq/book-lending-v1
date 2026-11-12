@@ -57,7 +57,7 @@ export default function Screen() {
   const markReturned = async (loan) => {
     setReturnError("");
     try {
-      await apiFetch("/loans/" + loan.id + "/return", { method: "POST" });
+      await apiFetch(`/loans/${loan.id}/return`, { method: "POST" });
     } catch (err) {
       setReturnError(errText(err, "Could not mark the loan returned. Please try again."));
       return;
