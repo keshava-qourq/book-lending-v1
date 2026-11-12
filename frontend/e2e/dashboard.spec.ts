@@ -92,7 +92,20 @@ test("[AC-029] two borrowed books are listed with title, author, dates and Mark 
     await expect(r.getByRole("button", { name: `Mark returned: ${t}` })).toBeVisible();
   }
   const due = new Date(dayOffset(14) + "T00:00:00Z");
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const dueText = `${String(due.getUTCDate()).padStart(2, "0")} ${months[due.getUTCMonth()]} ${due.getUTCFullYear()}`;
   await expect(currentTable(page).getByRole("row").filter({ hasText: t1 })).toContainText(dueText);
 });
@@ -132,10 +145,7 @@ test("[AC-032] a loan with a past due date appears in the overdue list", async (
   await expect(overdueTable(page).getByRole("row").filter({ hasText: title })).toHaveCount(1);
 });
 
-test("[AC-033] loans due today or later are not in the overdue list", async ({
-  page,
-  request,
-}) => {
+test("[AC-033] loans due today or later are not in the overdue list", async ({ page, request }) => {
   const tToday = `QA DueToday ${randomUUID().slice(0, 8)}`;
   const tLater = `QA DueLater ${randomUUID().slice(0, 8)}`;
   const id1 = await apiBook(request, tToday, 2);
