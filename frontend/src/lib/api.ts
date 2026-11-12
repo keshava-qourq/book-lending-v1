@@ -8,9 +8,6 @@
 // Set at build time: the platform bakes the deployed API URL into the frontend build. The
 // fallback is the local backend so a bare `npm run dev` still points somewhere real.
 //
-// The generated screens do NOT use this yet -- they render seeded sample data, exactly as
-// they were approved. This is the seam to replace that with real calls, one screen at a
-// time.
 export const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
 // The shared bearer the deployed API expects (its SECRET_KEY). The platform bakes the
