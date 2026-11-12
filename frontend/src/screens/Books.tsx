@@ -24,12 +24,22 @@ export default function Screen() {
   const [borrowError, setBorrowError] = React.useState("");
   const [borrowNote, setBorrowNote] = React.useState("");
 
+  const [q, setQ] = React.useState("");
+  const [availableOnly, setAvailableOnly] = React.useState(false);
+
   React.useEffect(() => {
     let live = true;
+    const params = new URLSearchParams();
+    if (q.trim()) params.set("q", q.trim());
+    if (availableOnly) params.set("available_only", "true");
+    const qs = params.toString();
     (async () => {
       try {
-        const list = await apiFetch<Book[]>("/books");
-        if (live) setBooks(list);
+        const list = await apiFetch<Book[]>(qs ? `/books?${qs}` : "/books");
+        if (live) {
+          setBooks(list);
+          setLoadError("");
+        }
       } catch (err) {
         if (live) setLoadError(err instanceof ApiError ? err.detail : "Could not load books.");
       } finally {
@@ -39,7 +49,9 @@ export default function Screen() {
     return () => {
       live = false;
     };
-  }, []);
+  }, [q, availableOnly]);
+
+  const filtering = q.trim() !== "" || availableOnly;
 
   const confirmDelete = async (book: Book) => {
     setDeleteError("");
@@ -89,6 +101,27 @@ export default function Screen() {
         </Button>
       </div>
 
+      <div className="mb-4 flex flex-wrap items-end gap-4">
+        <div className="flex flex-col gap-1">
+          <UI.Label htmlFor="book-search">Search</UI.Label>
+          <UI.Input
+            id="book-search"
+            type="search"
+            value={q}
+            autoComplete="off"
+            placeholder="Title or author"
+            onChange={(e) => setQ(e.target.value)}
+          />
+        </div>
+        <label className="flex items-center gap-2 pb-2 text-sm">
+          <UI.Checkbox
+            checked={availableOnly}
+            onChange={(e) => setAvailableOnly(e.target.checked)}
+          />
+          Available to borrow
+        </label>
+      </div>
+
       {deleteError && (
         <p role="alert" className="mb-4 border-2 p-3 text-sm font-bold">
           {deleteError}
@@ -112,6 +145,8 @@ export default function Screen() {
         <p role="alert" className="text-sm font-bold">
           {loadError}
         </p>
+      ) : books.length === 0 && filtering ? (
+        <Empty title="No books found" description="Try different search text." />
       ) : books.length === 0 ? (
         <Empty
           title="No books yet"
