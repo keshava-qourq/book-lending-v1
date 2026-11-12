@@ -2,6 +2,302 @@
 openapi: 3.1.0
 info:
   title: Book lending - v1
-  version: architecture-v0
+  version: architecture-v1
   description: Designed API from the approved architecture (not extracted from code).
-paths: {}
+paths:
+  /auth/signin:
+    post:
+      summary: Verify credentials and start a server-side session. The opaque token
+        is returned in the body only.
+      description: Verify credentials and start a server-side session. The opaque
+        token is returned in the body only.
+      operationId: post_auth_signin
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{email, password}'
+      responses:
+        '200':
+          description: '200 {access_token, token_type: ''bearer'', expires_at}. 401
+            generic ''Invalid email or password''.'
+  /auth/signout:
+    post:
+      summary: Revoke the current session on the server by clearing the stored token
+        hash.
+      description: Revoke the current session on the server by clearing the stored
+        token hash.
+      operationId: post_auth_signout
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: none
+      responses:
+        '200':
+          description: '204'
+      security:
+      - bearerAuth: []
+  /auth/signup:
+    post:
+      summary: Create an account. Email is lowercased and must be valid and unique,
+        and the password must be non-empty.
+      description: Create an account. Email is lowercased and must be valid and unique,
+        and the password must be non-empty.
+      operationId: post_auth_signup
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{email, password}'
+      responses:
+        '200':
+          description: 201 {id, email}. 409 email already registered. 422 field errors
+            with messages.
+  /books:
+    get:
+      summary: List books. q does a case-insensitive partial match on title or author.
+        available_only=true returns only books with avai
+      description: List books. q does a case-insensitive partial match on title or
+        author. available_only=true returns only books with available_copies > 0.
+      operationId: get_books
+      parameters: []
+      responses:
+        '200':
+          description: 200 [{id, title, author, total_copies, available_copies}].
+            An empty list lets the UI show 'no books found'.
+      security:
+      - bearerAuth: []
+    post:
+      summary: Add a book. All copies start available.
+      description: Add a book. All copies start available.
+      operationId: post_books
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{title, author, total_copies >= 1}'
+      responses:
+        '200':
+          description: 201 book. 422 field errors.
+      security:
+      - bearerAuth: []
+  /books/{book_id}:
+    get:
+      summary: Get one book, used to prefill the edit form.
+      description: Get one book, used to prefill the edit form.
+      operationId: get_books_book_id
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 200 book. 404.
+      security:
+      - bearerAuth: []
+    put:
+      summary: Edit title, author and total copies. Rejected if total is below the
+        number currently on loan. available_copies is adjust
+      description: Edit title, author and total copies. Rejected if total is below
+        the number currently on loan. available_copies is adjusted by the same delta.
+      operationId: put_books_book_id
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{title, author, total_copies}'
+      responses:
+        '200':
+          description: 200 book. 409 copies below number on loan. 422. 404.
+      security:
+      - bearerAuth: []
+    delete:
+      summary: Delete a book that has no active loans.
+      description: Delete a book that has no active loans.
+      operationId: delete_books_book_id
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 204. 409 'currently on loan'. 404.
+      security:
+      - bearerAuth: []
+  /books/{book_id}/borrow:
+    post:
+      summary: Borrow a book. Creates a loan due 14 days from today and decrements
+        available copies atomically.
+      description: Borrow a book. Creates a loan due 14 days from today and decrements
+        available copies atomically.
+      operationId: post_books_book_id_borrow
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: none
+      responses:
+        '200':
+          description: 201 {id, book_id, borrowed_at, due_date}. 409 no copies available
+            or already borrowed. 404.
+      security:
+      - bearerAuth: []
+  /health:
+    get:
+      summary: Liveness check for the hosting platform.
+      description: Liveness check for the hosting platform.
+      operationId: get_health
+      parameters: []
+      responses:
+        '200':
+          description: '200 {status: ''ok''}'
+  /loans/me:
+    get:
+      summary: Dashboard data for the signed-in user only. current lists all unreturned
+        loans, each with an is_overdue flag computed fr
+      description: Dashboard data for the signed-in user only. current lists all unreturned
+        loans, each with an is_overdue flag computed from due_date < today at read
+        time. overdue is the subset of current where is_overdue is true.
+      operationId: get_loans_me
+      parameters: []
+      responses:
+        '200':
+          description: '200 {current: [{id, book_id, title, author, borrowed_at, due_date,
+            is_overdue}], overdue: [same shape]}'
+      security:
+      - bearerAuth: []
+  /loans/{loan_id}/return:
+    post:
+      summary: Mark the caller's own loan returned and restore the copy exactly once.
+      description: Mark the caller's own loan returned and restore the copy exactly
+        once.
+      operationId: post_loans_loan_id_return
+      parameters:
+      - name: loan_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: none
+      responses:
+        '200':
+          description: 200 {id, returned_at}. 403 loan belongs to another user. 409
+            already returned. 404.
+      security:
+      - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    users:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        password_hash:
+          type: string
+        session_token_hash:
+          type: string
+        session_expires_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - email
+      - password_hash
+      - created_at
+    books:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        author:
+          type: string
+        total_copies:
+          type: integer
+        available_copies:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - title
+      - author
+      - total_copies
+      - available_copies
+      - created_at
+      - updated_at
+    loans:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        book_id:
+          type: string
+          format: uuid
+        borrowed_at:
+          type: string
+          format: date-time
+        due_date:
+          type: string
+          format: date
+        returned_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - user_id
+      - book_id
+      - borrowed_at
+      - due_date

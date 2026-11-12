@@ -7,7 +7,19 @@ _No routes found._
 <!-- sdlc:auto:end endpoints -->
 
 <!-- sdlc:auto:start drift -->
-_Code matches the designed API._
+**Designed but missing:**
+
+- DELETE /books/{book_id}
+- GET /books
+- GET /books/{book_id}
+- GET /loans/me
+- POST /auth/signin
+- POST /auth/signout
+- POST /auth/signup
+- POST /books
+- POST /books/{book_id}/borrow
+- POST /loans/{loan_id}/return
+- PUT /books/{book_id}
 <!-- sdlc:auto:end drift -->
 
 <!-- sdlc:auto:start source -->
