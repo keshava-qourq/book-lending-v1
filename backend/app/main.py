@@ -9,13 +9,17 @@ OpenAPI document and passes its tests before a single handler is implemented.
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import models  # noqa: F401 -- imported so the tables register on Base.metadata
 from app.config import get_settings
 from app.database import SessionLocal
 from app.migrate import run_migrations
+from app.routers.auth import router as auth_router
 from app.seed import seed_users
 
 
@@ -52,6 +56,29 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def _error(status: int, detail: str, errors: list[dict[str, str]], headers=None) -> JSONResponse:
+    return JSONResponse(
+        status_code=status, content={"detail": detail, "errors": errors}, headers=headers
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+    errors = [
+        {"field": str(e["loc"][-1]) if e.get("loc") else "", "message": str(e["msg"])}
+        for e in exc.errors()
+    ]
+    return _error(422, "Validation failed", errors)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_error_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+    return _error(exc.status_code, str(exc.detail), [], getattr(exc, "headers", None))
+
+
+app.include_router(auth_router)
 
 
 @app.get("/health")

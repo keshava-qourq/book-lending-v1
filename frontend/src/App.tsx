@@ -1,5 +1,14 @@
-import { NavLink, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import {
+  NavLink,
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
+import { apiFetch, clearSessionToken, getSessionToken } from "@/lib/api";
 import { Icons } from "@/lib/icons";
 import SignIn from "@/screens/SignIn";
 import SignUp from "@/screens/SignUp";
@@ -15,6 +24,17 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 // The app's menu, drawn around every screen except the ones routed outside it below.
 function AppShellLayout() {
+  const navigate = useNavigate();
+  const onDashboard = useLocation().pathname === "/dashboard";
+  const signOut = async () => {
+    try {
+      await apiFetch("/auth/signout", { method: "POST" });
+    } catch {
+      // Signing out locally must work whatever the server says.
+    }
+    clearSessionToken();
+    navigate("/sign-in");
+  };
   return (
     <div className="flex min-h-screen flex-col">
       <header
@@ -41,22 +61,49 @@ function AppShellLayout() {
               {"Books"}
             </NavLink>
           </nav>
+          {!onDashboard && (
+            <button
+              type="button"
+              onClick={signOut}
+              className="ml-auto text-sm font-medium"
+              style={{ color: "var(--brand-fg-muted)" }}
+            >
+              {"Sign out"}
+            </button>
+          )}
         </div>
       </header>
-      <main className="flex-1 overflow-auto">
+      <main
+        className="flex-1 overflow-auto"
+        onClickCapture={(e) => {
+          // A screen's own Sign out button must really end the session.
+          const btn = (e.target as HTMLElement).closest("button");
+          if (btn && /sign out/i.test(btn.textContent ?? "")) {
+            e.stopPropagation();
+            e.preventDefault();
+            void signOut();
+          }
+        }}
+      >
         <Outlet />
       </main>
     </div>
   );
 }
 
+function RequireAuth() {
+  return getSessionToken() ? <Outlet /> : <Navigate to="/sign-in" replace />;
+}
+
 export default function App() {
   return (
     <Routes>
-      <Route element={<AppShellLayout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/books" element={<Books />} />
-        <Route path="/book-form" element={<BookForm />} />
+      <Route element={<RequireAuth />}>
+        <Route element={<AppShellLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/books" element={<Books />} />
+          <Route path="/book-form" element={<BookForm />} />
+        </Route>
       </Route>
       <Route path="/sign-in" element={<SignIn />} />
       <Route path="/sign-up" element={<SignUp />} />

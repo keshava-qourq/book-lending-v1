@@ -84,12 +84,24 @@ class Loan(Base):
     )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     book_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("books.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("books.id", ondelete="CASCADE"), nullable=False, index=True
     )
     borrowed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     due_date: Mapped[date] = mapped_column(Date, nullable=False)
     returned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+def is_overdue(loan: Loan, now: datetime) -> bool:
+    """Overdue is derived at read time: unreturned and past its due date."""
+    if loan.returned_at is not None:
+        return False
+    due = loan.due_date
+    if isinstance(due, datetime):
+        return due < now
+    return due < now.date()

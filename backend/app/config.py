@@ -11,6 +11,7 @@ class Settings:
     bootstrap_admin_password: str | None
     smoke_test_email: str | None
     smoke_test_password: str | None
+    session_ttl_hours: float = 8
 
 
 def get_settings() -> Settings:
@@ -22,4 +23,5 @@ def get_settings() -> Settings:
         bootstrap_admin_password=os.getenv("BOOTSTRAP_ADMIN_PASSWORD") or None,
         smoke_test_email=os.getenv("SMOKE_TEST_EMAIL") or None,
         smoke_test_password=os.getenv("SMOKE_TEST_PASSWORD") or None,
+        session_ttl_hours=float(os.getenv("SESSION_TTL_HOURS") or 8),
     )

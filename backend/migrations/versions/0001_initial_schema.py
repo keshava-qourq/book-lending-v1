@@ -51,7 +51,9 @@ def upgrade() -> None:
     op.create_table(
         "loans",
         sa.Column("id", sa.Uuid(), primary_key=True),
-        sa.Column("user_id", sa.Uuid(), sa.ForeignKey("users.id"), nullable=False),
+        sa.Column(
+            "user_id", sa.Uuid(), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        ),
         sa.Column(
             "book_id", sa.Uuid(), sa.ForeignKey("books.id", ondelete="CASCADE"), nullable=False
         ),
@@ -61,6 +63,8 @@ def upgrade() -> None:
         sa.Column("due_date", sa.Date(), nullable=False),
         sa.Column("returned_at", sa.DateTime(timezone=True), nullable=True),
     )
+    op.create_index("ix_loans_user_id", "loans", ["user_id"])
+    op.create_index("ix_loans_book_id", "loans", ["book_id"])
     op.create_index(
         "uq_loans_active_user_book",
         "loans",

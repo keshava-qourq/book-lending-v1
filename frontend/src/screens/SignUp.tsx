@@ -1,27 +1,21 @@
 // @ts-nocheck -- generated from the approved design under its JS runtime contract; not hand-written TypeScript.
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import React from "react";
 
 import * as UI from "@/lib/ui";
 import { Icons } from "@/lib/icons";
+import { ApiError, apiFetch } from "@/lib/api";
 import { brand } from "@/lib/brand";
 import { useNavigate } from "@/lib/navigate";
-
-const REGISTERED_EMAILS = [
-  'mara.okafor@example.com',
-  'tobias.lindqvist@example.com',
-  'priya.raman@example.com',
-  'devon.achterberg@example.com',
-];
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export default function Screen() {
   const navigate = useNavigate();
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [errors, setErrors] = React.useState({});
-  const [banner, setBanner] = React.useState('idle'); // idle | duplicate | invalid
+  const [banner, setBanner] = React.useState("idle"); // idle | duplicate | invalid
   const [submitting, setSubmitting] = React.useState(false);
   const timer = React.useRef(null);
 
@@ -41,68 +35,83 @@ export default function Screen() {
     const next = {};
     if (!EMAIL_PATTERN.test(cleanEmail)) {
       next.email = cleanEmail
-        ? 'That does not look like an email. Use the form name@example.com.'
-        : 'Enter your email address.';
+        ? "That does not look like an email. Use the form name@example.com."
+        : "Enter your email address.";
     }
     if (!password) {
-      next.password = 'Enter a password. It cannot be empty.';
+      next.password = "Enter a password. It cannot be empty.";
     }
     if (Object.keys(next).length > 0) {
       setErrors(next);
-      setBanner('invalid');
-      return;
-    }
-    if (REGISTERED_EMAILS.includes(cleanEmail.toLowerCase())) {
-      setErrors({ email: 'This email is already registered. Letter case does not matter.' });
-      setBanner('duplicate');
+      setBanner("invalid");
       return;
     }
     setErrors({});
-    setBanner('idle');
+    setBanner("idle");
     setSubmitting(true);
-    timer.current = setTimeout(() => {
-      navigate('dashboard');
-    }, 700);
+    apiFetch("/auth/signup", {
+      method: "POST",
+      body: JSON.stringify({ email: cleanEmail, password }),
+    })
+      .then(() => navigate("sign-in"))
+      .catch((err) => {
+        setSubmitting(false);
+        if (err instanceof ApiError && err.status === 409) {
+          setErrors({ email: err.detail });
+          setBanner("duplicate");
+        } else if (err instanceof ApiError && err.status === 422) {
+          const fields = {};
+          for (const item of err.errors) {
+            const key = String(item.field).split(".").pop();
+            fields[key] = item.message;
+          }
+          setErrors(fields);
+          setBanner("invalid");
+        } else {
+          setErrors({ email: "Could not create the account. Please try again." });
+          setBanner("invalid");
+        }
+      });
   };
 
   const fieldStyle = (hasError) => ({
-    width: '100%',
-    border: '3px solid ' + ink,
+    width: "100%",
+    border: "3px solid " + ink,
     borderRadius: 0,
     backgroundColor: paper,
     color: ink,
     fontFamily: brand.fontBody,
     fontSize: 16,
-    padding: '12px 16px',
+    padding: "12px 16px",
     minHeight: 48,
-    boxShadow: hasError ? 'inset 0 -6px 0 0 ' + ink : 'none',
+    boxShadow: hasError ? "inset 0 -6px 0 0 " + ink : "none",
   });
 
   const labelStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "baseline",
     fontFamily: brand.fontBody,
     fontSize: 12,
     fontWeight: 700,
-    letterSpacing: '0.14em',
-    textTransform: 'uppercase',
+    letterSpacing: "0.14em",
+    textTransform: "uppercase",
     color: ink,
     marginBottom: 8,
   };
 
-  const isError = banner !== 'idle';
+  const isError = banner !== "idle";
   const bannerText =
-    banner === 'duplicate'
-      ? 'An account with this email already exists. Enter a valid email and a password.'
-      : banner === 'invalid'
-      ? 'Enter a valid email and a password.'
-      : 'Your email is your sign-in name, matched without regard to letter case. Your password is stored only as a hash.';
+    banner === "duplicate"
+      ? "An account with this email already exists. Enter a valid email and a password."
+      : banner === "invalid"
+        ? "Enter a valid email and a password."
+        : "Your email is your sign-in name, matched without regard to letter case. Your password is stored only as a hash.";
 
   return (
     <div
       style={{
-        minHeight: '100vh',
+        minHeight: "100vh",
         backgroundColor: paper,
         color: ink,
         fontFamily: brand.fontBody,
@@ -132,37 +141,37 @@ export default function Screen() {
       <main
         style={{
           maxWidth: 760,
-          margin: '0 auto',
-          padding: '64px 24px 64px',
+          margin: "0 auto",
+          padding: "64px 24px 64px",
         }}
       >
         <div
           data-wf="b-0-0"
-          style={{ borderTop: '3px solid ' + ink, paddingTop: 16, marginBottom: 48 }}
+          style={{ borderTop: "3px solid " + ink, paddingTop: 16, marginBottom: 48 }}
         >
           <p
             style={{
               fontSize: 12,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
               fontWeight: 700,
               margin: 0,
               marginBottom: 24,
-              display: 'flex',
-              justifyContent: 'space-between',
+              display: "flex",
+              justifyContent: "space-between",
               gap: 16,
             }}
           >
             <span>Nº 01 — Membership</span>
-            <span style={{ fontVariantNumeric: 'tabular-nums' }}>Loan period: 14 days</span>
+            <span style={{ fontVariantNumeric: "tabular-nums" }}>Loan period: 14 days</span>
           </p>
           <h1
             style={{
               fontFamily: brand.fontHeading,
               fontWeight: 900,
-              fontSize: 'clamp(48px, 11vw, 96px)',
+              fontSize: "clamp(48px, 11vw, 96px)",
               lineHeight: 0.95,
-              letterSpacing: '-0.02em',
+              letterSpacing: "-0.02em",
               margin: 0,
             }}
           >
@@ -172,19 +181,19 @@ export default function Screen() {
 
         <div
           style={{
-            border: '3px solid ' + ink,
-            boxShadow: '8px 8px 0 0 ' + ink,
+            border: "3px solid " + ink,
+            boxShadow: "8px 8px 0 0 " + ink,
             backgroundColor: paper,
             marginLeft: 0,
           }}
         >
           <div
             style={{
-              borderBottom: '3px solid ' + ink,
-              padding: '12px 24px',
+              borderBottom: "3px solid " + ink,
+              padding: "12px 24px",
               fontSize: 12,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
               fontWeight: 700,
               backgroundColor: ink,
               color: paper,
@@ -199,7 +208,7 @@ export default function Screen() {
             onSubmit={handleSubmit}
             noValidate
             aria-label="Sign up form"
-            style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 24 }}
+            style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}
           >
             <div>
               <UI.Label htmlFor="su-email" style={labelStyle}>
@@ -214,8 +223,8 @@ export default function Screen() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                aria-invalid={errors.email ? 'true' : 'false'}
-                aria-describedby={errors.email ? 'su-email-error' : undefined}
+                aria-invalid={errors.email ? "true" : "false"}
+                aria-describedby={errors.email ? "su-email-error" : undefined}
                 disabled={submitting}
                 placeholder="name@example.com"
                 style={fieldStyle(!!errors.email)}
@@ -224,9 +233,21 @@ export default function Screen() {
                 <p
                   id="su-email-error"
                   className="bs-banner"
-                  style={{ margin: '8px 0 0', fontSize: 13, fontWeight: 700, display: 'flex', gap: 8, alignItems: 'flex-start' }}
+                  style={{
+                    margin: "8px 0 0",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    display: "flex",
+                    gap: 8,
+                    alignItems: "flex-start",
+                  }}
                 >
-                  <Icons.AlertCircle aria-hidden="true" width={16} height={16} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <Icons.AlertCircle
+                    aria-hidden="true"
+                    width={16}
+                    height={16}
+                    style={{ flexShrink: 0, marginTop: 2 }}
+                  />
                   <span>Fix this: {errors.email}</span>
                 </p>
               )}
@@ -245,8 +266,8 @@ export default function Screen() {
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                aria-invalid={errors.password ? 'true' : 'false'}
-                aria-describedby={errors.password ? 'su-password-error' : undefined}
+                aria-invalid={errors.password ? "true" : "false"}
+                aria-describedby={errors.password ? "su-password-error" : undefined}
                 disabled={submitting}
                 style={fieldStyle(!!errors.password)}
               />
@@ -254,42 +275,72 @@ export default function Screen() {
                 <p
                   id="su-password-error"
                   className="bs-banner"
-                  style={{ margin: '8px 0 0', fontSize: 13, fontWeight: 700, display: 'flex', gap: 8, alignItems: 'flex-start' }}
+                  style={{
+                    margin: "8px 0 0",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    display: "flex",
+                    gap: 8,
+                    alignItems: "flex-start",
+                  }}
                 >
-                  <Icons.AlertCircle aria-hidden="true" width={16} height={16} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <Icons.AlertCircle
+                    aria-hidden="true"
+                    width={16}
+                    height={16}
+                    style={{ flexShrink: 0, marginTop: 2 }}
+                  />
                   <span>Fix this: {errors.password}</span>
                 </p>
               )}
             </div>
           </form>
 
-          <div style={{ borderTop: '3px dashed ' + ink }} />
+          <div style={{ borderTop: "3px dashed " + ink }} />
 
           <div
             data-wf="b-2-0"
-            role={isError ? 'alert' : 'status'}
+            role={isError ? "alert" : "status"}
             aria-live="polite"
             key={banner}
             className="bs-banner"
             style={{
-              padding: '16px 24px',
+              padding: "16px 24px",
               fontSize: 14,
               lineHeight: 1.6,
-              display: 'flex',
+              display: "flex",
               gap: 12,
-              alignItems: 'flex-start',
-              backgroundColor: isError ? ink : 'transparent',
+              alignItems: "flex-start",
+              backgroundColor: isError ? ink : "transparent",
               color: isError ? paper : brand.neutralColor,
             }}
           >
             {isError ? (
-              <Icons.AlertCircle aria-hidden="true" width={20} height={20} style={{ flexShrink: 0, marginTop: 2 }} />
+              <Icons.AlertCircle
+                aria-hidden="true"
+                width={20}
+                height={20}
+                style={{ flexShrink: 0, marginTop: 2 }}
+              />
             ) : (
-              <Icons.FileText aria-hidden="true" width={20} height={20} style={{ flexShrink: 0, marginTop: 2 }} />
+              <Icons.FileText
+                aria-hidden="true"
+                width={20}
+                height={20}
+                style={{ flexShrink: 0, marginTop: 2 }}
+              />
             )}
             <p style={{ margin: 0 }}>
               {isError && (
-                <strong style={{ letterSpacing: '0.14em', textTransform: 'uppercase', fontSize: 12, display: 'block', marginBottom: 4 }}>
+                <strong
+                  style={{
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    fontSize: 12,
+                    display: "block",
+                    marginBottom: 4,
+                  }}
+                >
                   Not created
                 </strong>
               )}
@@ -306,22 +357,22 @@ export default function Screen() {
             form="sign-up-form"
             disabled={submitting}
             style={{
-              width: '100%',
+              width: "100%",
               minHeight: 64,
-              border: '3px solid ' + ink,
+              border: "3px solid " + ink,
               borderRadius: 0,
               backgroundColor: brand.accentColor,
               color: ink,
-              boxShadow: '8px 8px 0 0 ' + ink,
+              boxShadow: "8px 8px 0 0 " + ink,
               fontFamily: brand.fontBody,
               fontSize: 16,
               fontWeight: 700,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              cursor: submitting ? 'progress' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              cursor: submitting ? "progress" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               gap: 12,
             }}
           >
@@ -341,10 +392,11 @@ export default function Screen() {
               style={{
                 height: 8,
                 marginTop: 16,
-                border: '3px solid ' + ink,
-                backgroundImage: 'repeating-linear-gradient(90deg, ' + ink + ' 0 16px, transparent 16px 32px)',
-                backgroundSize: '32px 100%',
-                animation: 'bs-bar 600ms linear infinite',
+                border: "3px solid " + ink,
+                backgroundImage:
+                  "repeating-linear-gradient(90deg, " + ink + " 0 16px, transparent 16px 32px)",
+                backgroundSize: "32px 100%",
+                animation: "bs-bar 600ms linear infinite",
               }}
             />
           )}
@@ -353,7 +405,7 @@ export default function Screen() {
         <div
           style={{
             marginTop: 48,
-            borderTop: '1px dashed ' + ink,
+            borderTop: "1px dashed " + ink,
             paddingTop: 24,
           }}
         >
@@ -361,17 +413,17 @@ export default function Screen() {
             type="button"
             data-wf="b-4-0"
             className="bs-link"
-            onClick={() => navigate('sign-in')}
+            onClick={() => navigate("sign-in")}
             style={{
-              background: 'none',
-              border: 'none',
-              padding: '8px 4px',
+              background: "none",
+              border: "none",
+              padding: "8px 4px",
               minHeight: 44,
               fontFamily: brand.fontBody,
               fontSize: 15,
               fontWeight: 700,
               color: ink,
-              cursor: 'pointer',
+              cursor: "pointer",
             }}
           >
             Already have an account? Sign in
