@@ -105,10 +105,7 @@ def test_nfr006_users_table_holds_no_extra_personal_data(db_session: Session) ->
     cols = {
         row[0]
         for row in db_session.execute(
-            text(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name = 'users'"
-            )
+            text("SELECT column_name FROM information_schema.columns WHERE table_name = 'users'")
         )
     }
     assert cols == {
